@@ -7,6 +7,7 @@ class LocationNotifier extends ChangeNotifier {
   LatLng _coords = const LatLng(0, 0);
   LatLng get coords => _coords;
 
+  /// Lấy vị trí hiện tại
   Future<void> getLocation() async {
     try {
       final position = await Geolocator.getCurrentPosition(
@@ -16,6 +17,26 @@ class LocationNotifier extends ChangeNotifier {
       notifyListeners();
     } catch (e) {
       return Future.error("Failed to get location: $e");
+    }
+  }
+
+  /// Yêu cầu quyền truy cập vị trí
+  Future<bool> requestPermission() async {
+    LocationPermission permission = await Geolocator.requestPermission();
+    return permission == LocationPermission.always ||
+        permission == LocationPermission.whileInUse;
+  }
+
+  /// Trả về vị trí hiện tại (không thay đổi state)
+  Future<LatLng?> getCurrentPosition() async {
+    try {
+      final position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+      return LatLng(position.latitude, position.longitude);
+    } catch (e) {
+      print("Lỗi khi lấy vị trí hiện tại: $e");
+      return null; // Trả về null nếu không lấy được vị trí
     }
   }
 }
